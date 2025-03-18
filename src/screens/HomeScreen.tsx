@@ -28,24 +28,57 @@ function HomeScreen(): React.JSX.Element {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [cityInput, setCityInput] = useState<string>('');
+  const [inputError, setInputError] = useState<string | null>(null);
   const [currentCity, setCurrentCity] = useState<string>('Helsinki');
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [showRecentSearches, setShowRecentSearches] = useState<boolean>(false);
 
   const fetchWeatherData = useCallback(
     async (city: string = currentCity) => {
       try {
         setLoading(true);
+        setError(null);
+
         const [currentData, forecastResponse] = await Promise.all([
           getCurrentWeather(city),
           getFiveDayForecast(city),
         ]);
+
         setWeatherData(currentData);
         setForecastData(forecastResponse);
         setCurrentCity(city);
-        setError(null);
-      } catch (err) {
-        setError(
-          'Failed to fetch weather data. Please check the city name and try again.',
-        );
+      } catch (err: any) {
+        if (err.response) {
+          switch (err.response.status) {
+            case 404:
+              setError(
+                `City "${city}" not found. Please check the spelling and try again.`,
+              );
+              break;
+            case 401:
+              setError(
+                'API key is invalid or missing. Please contact support.',
+              );
+              break;
+            case 429:
+              setError('Too many requests. Please try again later.');
+              break;
+            case 504:
+              setError(
+                'Weather service is temporarily unavailable. Please try again later.',
+              );
+              break;
+            default:
+              setError(`Error fetching weather data: ${err.response.status}`);
+          }
+        } else if (err.request) {
+          setError(
+            'Network error. Please check your internet connection and try again.',
+          );
+        } else {
+          setError('Failed to fetch weather data. Please try again later.');
+        }
+        console.error('Weather API error:', err);
       } finally {
         setLoading(false);
       }
@@ -61,11 +94,56 @@ function HomeScreen(): React.JSX.Element {
     return () => clearInterval(intervalId);
   }, [fetchWeatherData]);
 
+  const saveToRecentSearches = useCallback((city: string) => {
+    setRecentSearches(prev => {
+      const filtered = prev.filter(
+        item => item.toLowerCase() !== city.toLowerCase(),
+      );
+      return [city, ...filtered].slice(0, 5);
+    });
+  }, []);
+
+  const validateCity = (city: string): boolean => {
+    setInputError(null);
+
+    if (!city.trim()) {
+      setInputError('Please enter a city name');
+      return false;
+    }
+
+    if (city.trim().length < 2) {
+      setInputError('City name must be at least 2 characters');
+      return false;
+    }
+
+    if (!/^[a-zA-Z\s\-]+$/.test(city.trim())) {
+      setInputError('City name can only contain letters, spaces, and hyphens');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSearch = () => {
-    if (cityInput.trim()) {
-      fetchWeatherData(cityInput.trim());
+    if (validateCity(cityInput)) {
+      const trimmedCity = cityInput.trim();
+
+      if (!loading) {
+        fetchWeatherData(trimmedCity);
+        saveToRecentSearches(trimmedCity);
+        setCityInput('');
+        Keyboard.dismiss();
+        setShowRecentSearches(false);
+      }
+    }
+  };
+
+  const handleRecentSearch = (city: string) => {
+    if (!loading) {
+      fetchWeatherData(city);
+      saveToRecentSearches(city);
       setCityInput('');
-      Keyboard.dismiss();
+      setShowRecentSearches(false);
     }
   };
 
@@ -175,80 +253,119 @@ function HomeScreen(): React.JSX.Element {
       .slice(0, 5);
   };
 
+  const handleOutsidePress = () => {
+    if (showRecentSearches) {
+      setShowRecentSearches(false);
+    }
+  };
+
+  useEffect(() => {
+    setRecentSearches(['Helsinki', 'Valencia']);
+  }, []);
+
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled">
-          <Text style={styles.header}>Weather Today</Text>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={handleOutsidePress}
+          style={{flex: 1}}>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled">
+            <Text style={styles.header}>Weather Today</Text>
 
-          <View style={styles.searchContainer}>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Enter city name"
-              value={cityInput}
-              onChangeText={setCityInput}
-              onSubmitEditing={handleSearch}
-              returnKeyType="search"
-            />
-            <TouchableOpacity
-              style={styles.searchButton}
-              onPress={handleSearch}
-              disabled={loading}>
-              <Text style={styles.searchButtonText}>Search</Text>
-            </TouchableOpacity>
-          </View>
+            <View style={styles.searchContainer}>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Enter city name"
+                  value={cityInput}
+                  onChangeText={text => {
+                    setCityInput(text);
+                    setInputError(null);
+                  }}
+                  onFocus={() => setShowRecentSearches(true)}
+                  onSubmitEditing={handleSearch}
+                  returnKeyType="search"
+                />
 
-          <Text style={styles.location}>
-            {weatherData
-              ? `${weatherData.name}, ${weatherData.sys.country}`
-              : 'Loading location...'}
-          </Text>
-
-          {weatherData && (
-            <Text style={styles.date}>{formatDate(weatherData.dt)}</Text>
-          )}
-
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#0066ff" />
-              <Text style={styles.loadingText}>Loading weather data...</Text>
-            </View>
-          ) : error ? (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          ) : weatherData ? (
-            <>
-              <WeatherCard
-                temperature={weatherData.main.temp}
-                feelsLike={weatherData.main.feels_like}
-                description={weatherData.weather[0].description}
-                iconCode={weatherData.weather[0].icon}
-                windSpeed={weatherData.wind.speed}
-                humidity={weatherData.main.humidity}
-              />
-              <View style={styles.forecastContainer}>
-                <Text style={styles.forecastTitle}>5-Day Forecast</Text>
-                {processForecastData().map((item, index) => (
-                  <ForecastCard
-                    key={index}
-                    date={formatShortDate(item.dt)}
-                    dayOfWeek={getDayOfWeek(item.dt)}
-                    tempMin={item.temp_min}
-                    tempMax={item.temp_max}
-                    dayIconCode={item.day_icon}
-                    nightIconCode={item.night_icon}
-                  />
-                ))}
+                {showRecentSearches && recentSearches.length > 0 && (
+                  <View style={styles.recentSearchesDropdown}>
+                    {recentSearches.map((city, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.recentSearchItem}
+                        onPress={() => handleRecentSearch(city)}>
+                        <Text style={styles.recentSearchText}>{city}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
               </View>
-            </>
-          ) : null}
-        </ScrollView>
+
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleSearch}
+                disabled={loading}>
+                <Text style={styles.searchButtonText}>Search</Text>
+              </TouchableOpacity>
+            </View>
+
+            {inputError && (
+              <Text style={styles.inputErrorText}>{inputError}</Text>
+            )}
+
+            <Text style={styles.location}>
+              {weatherData
+                ? `${weatherData.name}, ${weatherData.sys.country}`
+                : 'Loading location...'}
+            </Text>
+
+            {weatherData && (
+              <Text style={styles.date}>{formatDate(weatherData.dt)}</Text>
+            )}
+
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0066ff" />
+                <Text style={styles.loadingText}>Loading weather data...</Text>
+              </View>
+            ) : error ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            ) : weatherData ? (
+              <>
+                <WeatherCard
+                  temperature={weatherData.main.temp}
+                  feelsLike={weatherData.main.feels_like}
+                  description={weatherData.weather[0].description}
+                  iconCode={weatherData.weather[0].icon}
+                  windSpeed={weatherData.wind.speed}
+                  humidity={weatherData.main.humidity}
+                />
+                <View style={styles.forecastContainer}>
+                  <Text style={styles.forecastTitle}>5-Day Forecast</Text>
+                  {processForecastData().map((item, index) => (
+                    <ForecastCard
+                      key={index}
+                      date={formatShortDate(item.dt)}
+                      dayOfWeek={getDayOfWeek(item.dt)}
+                      tempMin={item.temp_min}
+                      tempMax={item.temp_max}
+                      dayIconCode={item.day_icon}
+                      nightIconCode={item.night_icon}
+                    />
+                  ))}
+                </View>
+              </>
+            ) : null}
+          </ScrollView>
+        </TouchableOpacity>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -278,11 +395,14 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: 8,
     marginHorizontal: 8,
   },
-  searchInput: {
+  inputWrapper: {
     flex: 1,
+    position: 'relative',
+  },
+  searchInput: {
     height: 48,
     borderWidth: 1,
     borderColor: '#ddd',
@@ -290,6 +410,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     backgroundColor: 'white',
     fontSize: 16,
+  },
+  recentSearchesDropdown: {
+    position: 'absolute',
+    top: 48,
+    left: 0,
+    right: 0,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    zIndex: 10,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  recentSearchItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  recentSearchText: {
+    fontSize: 16,
+    color: '#333',
   },
   searchButton: {
     marginLeft: 8,
@@ -303,6 +451,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  inputErrorText: {
+    color: '#d32f2f',
+    marginHorizontal: 12,
+    marginBottom: 12,
+    fontSize: 14,
   },
   location: {
     fontSize: 24,
