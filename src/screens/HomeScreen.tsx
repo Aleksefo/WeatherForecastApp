@@ -34,12 +34,12 @@ function HomeScreen(): React.JSX.Element {
     async (city: string = currentCity) => {
       try {
         setLoading(true);
-        const [currentData, forecastData] = await Promise.all([
+        const [currentData, forecastResponse] = await Promise.all([
           getCurrentWeather(city),
           getFiveDayForecast(city),
         ]);
         setWeatherData(currentData);
-        setForecastData(forecastData);
+        setForecastData(forecastResponse);
         setCurrentCity(city);
         setError(null);
       } catch (err) {
@@ -95,7 +95,9 @@ function HomeScreen(): React.JSX.Element {
   };
 
   const processForecastData = () => {
-    if (!forecastData) return [];
+    if (!forecastData) {
+      return [];
+    }
 
     // The API returns forecast data every 3 hours
     // We need to group by day and calculate min/max temperatures and find day/night icons
@@ -111,7 +113,9 @@ function HomeScreen(): React.JSX.Element {
       const isDay = hour >= 6 && hour < 18; // Simple day/night check
 
       // Skip today's forecasts
-      if (day === todayStr) continue;
+      if (day === todayStr) {
+        continue;
+      }
 
       if (!dailyDataMap.has(day)) {
         dailyDataMap.set(day, {
