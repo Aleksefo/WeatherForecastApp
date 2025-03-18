@@ -23,7 +23,21 @@ export const useAppStore = create<State>()(
     persist(
       set => ({
         savedLocation: '',
+        recentSearches: [],
         setLocation: location => set(() => ({savedLocation: location})),
+        addRecentSearch: (location: string) =>
+          set(state => {
+            // Remove location if it already exists
+            const filteredSearches = state.recentSearches.filter(
+              item => item.toLowerCase() !== location.toLowerCase(),
+            );
+            return {
+              recentSearches: [location, ...filteredSearches].slice(0, 5),
+              savedLocation: location,
+            };
+          }),
+
+        clearRecentSearches: () => set({recentSearches: []}),
       }),
       {
         name: 'app-storage',

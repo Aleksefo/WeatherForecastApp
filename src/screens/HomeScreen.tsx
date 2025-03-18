@@ -21,6 +21,7 @@ import {
   WeatherData,
   ForecastData,
 } from '../services/weatherApi';
+import {useAppStore} from '../state/AppState';
 
 function HomeScreen(): React.JSX.Element {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
@@ -29,12 +30,13 @@ function HomeScreen(): React.JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [cityInput, setCityInput] = useState<string>('');
   const [inputError, setInputError] = useState<string | null>(null);
-  const [currentCity, setCurrentCity] = useState<string>('Helsinki');
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [showRecentSearches, setShowRecentSearches] = useState<boolean>(false);
 
+  const {savedLocation, recentSearches, setLocation, addRecentSearch} =
+    useAppStore();
+
   const fetchWeatherData = useCallback(
-    async (city: string = currentCity) => {
+    async (city: string = savedLocation || 'Valencia') => {
       try {
         setLoading(true);
         setError(null);
@@ -46,7 +48,7 @@ function HomeScreen(): React.JSX.Element {
 
         setWeatherData(currentData);
         setForecastData(forecastResponse);
-        setCurrentCity(city);
+        setLocation(city);
       } catch (err: any) {
         if (err.response) {
           switch (err.response.status) {
@@ -83,7 +85,7 @@ function HomeScreen(): React.JSX.Element {
         setLoading(false);
       }
     },
-    [currentCity],
+    [savedLocation, setLocation],
   );
 
   useEffect(() => {
@@ -93,15 +95,6 @@ function HomeScreen(): React.JSX.Element {
     const intervalId = setInterval(() => fetchWeatherData(), 10 * 60 * 1000);
     return () => clearInterval(intervalId);
   }, [fetchWeatherData]);
-
-  const saveToRecentSearches = useCallback((city: string) => {
-    setRecentSearches(prev => {
-      const filtered = prev.filter(
-        item => item.toLowerCase() !== city.toLowerCase(),
-      );
-      return [city, ...filtered].slice(0, 5);
-    });
-  }, []);
 
   const validateCity = (city: string): boolean => {
     setInputError(null);
@@ -116,7 +109,7 @@ function HomeScreen(): React.JSX.Element {
       return false;
     }
 
-    if (!/^[a-zA-Z\s\-]+$/.test(city.trim())) {
+    if (!/^[a-zA-Z\s-]+$/.test(city.trim())) {
       setInputError('City name can only contain letters, spaces, and hyphens');
       return false;
     }
@@ -129,8 +122,8 @@ function HomeScreen(): React.JSX.Element {
       const trimmedCity = cityInput.trim();
 
       if (!loading) {
+        addRecentSearch(trimmedCity);
         fetchWeatherData(trimmedCity);
-        saveToRecentSearches(trimmedCity);
         setCityInput('');
         Keyboard.dismiss();
         setShowRecentSearches(false);
@@ -140,8 +133,8 @@ function HomeScreen(): React.JSX.Element {
 
   const handleRecentSearch = (city: string) => {
     if (!loading) {
+      addRecentSearch(city);
       fetchWeatherData(city);
-      saveToRecentSearches(city);
       setCityInput('');
       setShowRecentSearches(false);
     }
@@ -258,10 +251,6 @@ function HomeScreen(): React.JSX.Element {
       setShowRecentSearches(false);
     }
   };
-
-  useEffect(() => {
-    setRecentSearches(['Helsinki', 'Valencia']);
-  }, []);
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
