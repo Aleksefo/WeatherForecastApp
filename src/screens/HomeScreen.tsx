@@ -280,7 +280,7 @@ function HomeScreen(): React.JSX.Element {
           <TouchableOpacity
             activeOpacity={1}
             onPress={handleOutsidePress}
-            style={{flex: 1}}>
+            style={styles.touchableContainer}>
             <Text style={styles.header}>Weather Today</Text>
 
             <View style={styles.searchContainer}>
@@ -387,6 +387,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollView: {
+    flex: 1,
+  },
+  touchableContainer: {
     flex: 1,
   },
   content: {
