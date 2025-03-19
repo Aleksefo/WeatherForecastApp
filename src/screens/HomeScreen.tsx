@@ -32,6 +32,8 @@ function HomeScreen(): React.JSX.Element {
   const [inputError, setInputError] = useState<string | null>(null);
   const [showRecentSearches, setShowRecentSearches] = useState<boolean>(false);
 
+  const inputRef = React.useRef<TextInput>(null);
+
   const {savedLocation, recentSearches, setLocation, addRecentSearch} =
     useAppStore();
 
@@ -125,7 +127,11 @@ function HomeScreen(): React.JSX.Element {
         addRecentSearch(trimmedCity);
         fetchWeatherData(trimmedCity);
         setCityInput('');
+        if (inputRef.current) {
+          inputRef.current.blur();
+        }
         Keyboard.dismiss();
+
         setShowRecentSearches(false);
       }
     }
@@ -136,6 +142,12 @@ function HomeScreen(): React.JSX.Element {
       addRecentSearch(city);
       fetchWeatherData(city);
       setCityInput('');
+
+      if (inputRef.current) {
+        inputRef.current.blur();
+      }
+      Keyboard.dismiss();
+
       setShowRecentSearches(false);
     }
   };
@@ -247,6 +259,10 @@ function HomeScreen(): React.JSX.Element {
   };
 
   const handleOutsidePress = () => {
+    if (inputRef.current) {
+      inputRef.current.blur();
+    }
+    Keyboard.dismiss();
     if (showRecentSearches) {
       setShowRecentSearches(false);
     }
@@ -257,19 +273,20 @@ function HomeScreen(): React.JSX.Element {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}>
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={handleOutsidePress}
-          style={{flex: 1}}>
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled">
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled">
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={handleOutsidePress}
+            style={{flex: 1}}>
             <Text style={styles.header}>Weather Today</Text>
 
             <View style={styles.searchContainer}>
               <View style={styles.inputWrapper}>
                 <TextInput
+                  ref={inputRef}
                   style={styles.searchInput}
                   placeholder="Enter city name"
                   value={cityInput}
@@ -280,6 +297,7 @@ function HomeScreen(): React.JSX.Element {
                   onFocus={() => setShowRecentSearches(true)}
                   onSubmitEditing={handleSearch}
                   returnKeyType="search"
+                  submitBehavior="blurAndSubmit"
                 />
 
                 {showRecentSearches && recentSearches.length > 0 && (
@@ -353,8 +371,8 @@ function HomeScreen(): React.JSX.Element {
                 </View>
               </>
             ) : null}
-          </ScrollView>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
