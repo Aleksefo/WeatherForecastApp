@@ -14,7 +14,12 @@ jest.mock('../../components/SearchBar', () => {
   const {forwardRef} = jest.requireActual('react');
   return {
     __esModule: true,
-    default: forwardRef((props, ref) => <div data-testid="mock-search-bar" />),
+    SearchBarRef: {},
+    default: forwardRef(
+      (_props: Record<string, unknown>, _ref: React.Ref<unknown>) => (
+        <div data-testid="mock-search-bar" />
+      ),
+    ),
   };
 });
 
@@ -115,9 +120,13 @@ describe('HomeScreen Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useAppStore as jest.Mock).mockReturnValue(mockStore);
-    (getCurrentWeather as jest.Mock).mockResolvedValue(mockWeatherData);
-    (getFiveDayForecast as jest.Mock).mockResolvedValue(mockForecastData);
+    (useAppStore as unknown as jest.Mock).mockReturnValue(mockStore);
+    (getCurrentWeather as unknown as jest.Mock).mockResolvedValue(
+      mockWeatherData,
+    );
+    (getFiveDayForecast as unknown as jest.Mock).mockResolvedValue(
+      mockForecastData,
+    );
   });
 
   it('should fetch weather data on mount', async () => {
@@ -137,10 +146,10 @@ describe('HomeScreen Component', () => {
   });
 
   it('should handle API errors correctly', async () => {
-    (getCurrentWeather as jest.Mock).mockRejectedValueOnce({
+    (getCurrentWeather as unknown as jest.Mock).mockRejectedValueOnce({
       response: {status: 404},
     });
-    (getFiveDayForecast as jest.Mock).mockRejectedValueOnce({
+    (getFiveDayForecast as unknown as jest.Mock).mockRejectedValueOnce({
       response: {status: 404},
     });
 

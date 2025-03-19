@@ -1,3 +1,4 @@
+/* eslint-env jest */
 jest.mock('react-native/Libraries/Components/Keyboard/Keyboard', () => ({
   dismiss: jest.fn(),
   isVisible: jest.fn(() => false),
