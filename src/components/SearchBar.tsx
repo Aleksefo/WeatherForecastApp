@@ -8,12 +8,17 @@ import {
   Keyboard,
 } from 'react-native';
 import {colors, spacing, typography, shadows, borderRadius} from '../styles/theme';
+import GPSButton from './GPSButton';
 
 interface SearchBarProps {
   onSearch: (city: string) => void;
   recentSearches: string[];
   onSelectRecentSearch: (city: string) => void;
   isLoading: boolean;
+  onLocationReceived: (coords: { lat: number; lon: number }) => void;
+  onLocationError: (message: string) => void;
+  locationLoading: boolean;
+  setLocationLoading: (loading: boolean) => void;
 }
 
 export interface SearchBarRef {
@@ -26,6 +31,10 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
   recentSearches,
   onSelectRecentSearch,
   isLoading,
+  onLocationReceived,
+  onLocationError,
+  locationLoading,
+  setLocationLoading,
 }, ref) => {
   const [cityInput, setCityInput] = useState<string>('');
   const [inputError, setInputError] = useState<string | null>(null);
@@ -100,6 +109,12 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
   return (
     <>
       <View style={styles.searchContainer}>
+        <GPSButton
+          onLocationReceived={onLocationReceived}
+          onError={onLocationError}
+          isLoading={locationLoading}
+          setIsLoading={setLocationLoading}
+        />
         <View style={styles.inputWrapper}>
           <TextInput
             ref={inputRef}

@@ -62,7 +62,12 @@ export interface ForecastData {
   };
 }
 
-export const getCurrentWeather = async (
+export interface Coordinates {
+  lat: number;
+  lon: number;
+}
+
+export const getCurrentWeatherByCity = async (
   city: string = 'Helsinki',
   country: string = 'Finland',
 ): Promise<WeatherData> => {
@@ -72,12 +77,37 @@ export const getCurrentWeather = async (
     );
     return response.data;
   } catch (error) {
-    __DEV__ && console.error('Error fetching current weather:', error);
+    __DEV__ && console.error('Error fetching current weather by city:', error);
     throw error;
   }
 };
 
-export const getFiveDayForecast = async (
+export const getCurrentWeatherByCoords = async (
+  coords: Coordinates
+): Promise<WeatherData> => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/weather?lat=${coords.lat}&lon=${coords.lon}&units=metric&appid=${API_KEY}`,
+    );
+    return response.data;
+  } catch (error) {
+    __DEV__ && console.error('Error fetching current weather by coords:', error);
+    throw error;
+  }
+};
+
+export const getCurrentWeather = async (
+  cityOrCoords: string | Coordinates = 'Helsinki',
+  country: string = 'Finland',
+): Promise<WeatherData> => {
+  if (typeof cityOrCoords === 'string') {
+    return getCurrentWeatherByCity(cityOrCoords, country);
+  } else {
+    return getCurrentWeatherByCoords(cityOrCoords);
+  }
+};
+
+export const getFiveDayForecastByCity = async (
   city: string = 'Helsinki',
   country: string = 'Finland',
 ): Promise<ForecastData> => {
@@ -87,8 +117,33 @@ export const getFiveDayForecast = async (
     );
     return response.data;
   } catch (error) {
-    __DEV__ && console.error('Error fetching forecast:', error);
+    __DEV__ && console.error('Error fetching forecast by city:', error);
     throw error;
+  }
+};
+
+export const getFiveDayForecastByCoords = async (
+  coords: Coordinates
+): Promise<ForecastData> => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/forecast?lat=${coords.lat}&lon=${coords.lon}&units=metric&appid=${API_KEY}`,
+    );
+    return response.data;
+  } catch (error) {
+    __DEV__ && console.error('Error fetching forecast by coords:', error);
+    throw error;
+  }
+};
+
+export const getFiveDayForecast = async (
+  cityOrCoords: string | Coordinates = 'Helsinki',
+  country: string = 'Finland',
+): Promise<ForecastData> => {
+  if (typeof cityOrCoords === 'string') {
+    return getFiveDayForecastByCity(cityOrCoords, country);
+  } else {
+    return getFiveDayForecastByCoords(cityOrCoords);
   }
 };
 

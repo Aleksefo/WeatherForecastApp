@@ -20,6 +20,7 @@ import {
   getFiveDayForecast,
   WeatherData,
   ForecastData,
+  Coordinates,
 } from '../services/weatherApi';
 import {useAppStore} from '../state/AppState';
 import {formatDate} from '../services/dateFormatter';
@@ -36,32 +37,46 @@ function HomeScreen(): React.JSX.Element {
   const [forecastData, setForecastData] = useState<ForecastData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [locationLoading, setLocationLoading] = useState<boolean>(false);
   const searchBarRef = useRef<SearchBarRef>(null);
 
   const {savedLocation, recentSearches, setLocation, addRecentSearch} =
     useAppStore();
 
   const fetchWeatherData = useCallback(
-    async (city: string = savedLocation || 'Valencia') => {
+    async (
+      cityOrCoords: string | Coordinates = savedLocation || 'Valencia',
+    ) => {
       try {
         setLoading(true);
         setError(null);
 
         const [currentData, forecastResponse] = await Promise.all([
-          getCurrentWeather(city),
-          getFiveDayForecast(city),
+          getCurrentWeather(cityOrCoords),
+          getFiveDayForecast(cityOrCoords),
         ]);
 
         setWeatherData(currentData);
         setForecastData(forecastResponse);
-        setLocation(city);
+
+        if (typeof cityOrCoords === 'string') {
+          setLocation(cityOrCoords);
+        } else if (currentData && currentData.name) {
+          setLocation(currentData.name);
+        }
       } catch (err: any) {
         if (err.response) {
           switch (err.response.status) {
             case 404:
-              setError(
-                `City "${city}" not found. Please check the spelling and try again.`,
-              );
+              if (typeof cityOrCoords === 'string') {
+                setError(
+                  `City "${cityOrCoords}" not found. Please check the spelling and try again.`,
+                );
+              } else {
+                setError(
+                  'Location not found. Please try a different location.',
+                );
+              }
               break;
             case 401:
               setError(
@@ -136,6 +151,10 @@ function HomeScreen(): React.JSX.Element {
               recentSearches={recentSearches}
               onSelectRecentSearch={handleSearch}
               isLoading={loading}
+              onLocationReceived={coords => fetchWeatherData(coords)}
+              onLocationError={message => setError(message)}
+              locationLoading={locationLoading}
+              setLocationLoading={setLocationLoading}
             />
 
             <Text style={styles.location}>
