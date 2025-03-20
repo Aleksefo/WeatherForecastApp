@@ -3,6 +3,7 @@ import {View, Text, StyleSheet} from 'react-native';
 import {ForecastData} from '../services/weatherApi';
 import ForecastCard from './ForecastCard';
 import {formatShortDate, getDayOfWeek} from '../services/dateFormatter';
+import {colors, spacing, typography, shadows, borderRadius} from '../styles/theme';
 
 interface ForecastListProps {
   forecastData: ForecastData | null;
@@ -88,30 +89,41 @@ const ForecastList: React.FC<ForecastListProps> = ({forecastData}) => {
   return (
     <View style={styles.forecastContainer}>
       <Text style={styles.forecastTitle}>5-Day Forecast</Text>
-      {processForecastData().map((item, index) => (
-        <ForecastCard
-          key={index}
-          date={formatShortDate(item.dt)}
-          dayOfWeek={getDayOfWeek(item.dt)}
-          tempMin={item.temp_min}
-          tempMax={item.temp_max}
-          dayIconCode={item.day_icon}
-          nightIconCode={item.night_icon}
-        />
-      ))}
+      <View style={styles.forecastCardContainer}>
+        {processForecastData().map((item, index) => (
+          <ForecastCard
+            key={index}
+            date={formatShortDate(item.dt)}
+            dayOfWeek={getDayOfWeek(item.dt)}
+            tempMin={item.temp_min}
+            tempMax={item.temp_max}
+            dayIconCode={item.day_icon}
+            nightIconCode={item.night_icon}
+          />
+        ))}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   forecastContainer: {
-    marginTop: 32,
+    marginTop: spacing.xl,
+    backgroundColor: colors.cardBackground,
+    borderRadius: borderRadius.large,
+    padding: spacing.md,
+    ...shadows.medium,
   },
   forecastTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    color: '#0066ff',
+    ...typography.subheader,
+    marginBottom: spacing.md,
+    color: colors.primary,
+    textAlign: 'center',
+  },
+  forecastCardContainer: {
+    backgroundColor: colors.background,
+    borderRadius: borderRadius.medium,
+    overflow: 'hidden',
   },
 });
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, Image} from 'react-native';
 import {getWeatherIconUrl} from '../services/weatherApi';
+import {colors, spacing, typography, borderRadius} from '../styles/theme';
 
 interface ForecastCardProps {
   date: string;
@@ -44,31 +45,29 @@ const ForecastCard = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: colors.cardBackground,
+    borderRadius: borderRadius.medium,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primaryLight,
   },
   dateContainer: {
     width: '30%',
   },
   dayOfWeek: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    ...typography.body,
+    fontWeight: 'bold', // Override the normal fontWeight from typography.body
+    color: colors.textDark,
   },
   date: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
+    ...typography.caption,
+    color: colors.textMedium,
+    marginTop: spacing.xs,
+    fontStyle: 'italic',
   },
   detailsContainer: {
     flexDirection: 'row',
@@ -79,18 +78,18 @@ const styles = StyleSheet.create({
   weatherIcon: {
     width: 40,
     height: 40,
-    marginHorizontal: 4,
+    marginHorizontal: spacing.xs,
   },
   temperatureMax: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0066ff',
-    marginHorizontal: 8,
+    fontWeight: 'bold' as const,
+    color: colors.primary,
+    marginHorizontal: spacing.sm,
   },
   temperatureMin: {
     fontSize: 16,
-    color: '#666',
-    marginHorizontal: 8,
+    color: colors.textMedium,
+    marginHorizontal: spacing.sm,
   },
 });
 

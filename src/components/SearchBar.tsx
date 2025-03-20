@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Keyboard,
 } from 'react-native';
+import {colors, spacing, typography, shadows, borderRadius} from '../styles/theme';
 
 interface SearchBarProps {
   onSearch: (city: string) => void;
@@ -146,8 +147,8 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
 const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
-    marginBottom: 8,
-    marginHorizontal: 8,
+    marginBottom: spacing.sm,
+    marginHorizontal: spacing.sm,
   },
   inputWrapper: {
     flex: 1,
@@ -156,58 +157,62 @@ const styles = StyleSheet.create({
   searchInput: {
     height: 48,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    backgroundColor: 'white',
-    fontSize: 16,
+    borderColor: colors.primaryLight,
+    borderRadius: borderRadius.medium,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.cardBackground,
+    ...typography.body,
+    color: colors.textDark,
   },
   recentSearchesDropdown: {
     position: 'absolute',
     top: 48,
     left: 0,
     right: 0,
-    backgroundColor: 'white',
+    backgroundColor: colors.cardBackground,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    borderColor: colors.primaryLight,
+    borderTopWidth: 0,
+    borderRadius: borderRadius.medium,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     zIndex: 10,
+    // Use shadows.medium but avoid its elevation property
+    shadowColor: shadows.medium.shadowColor,
+    shadowOffset: shadows.medium.shadowOffset,
+    shadowOpacity: shadows.medium.shadowOpacity,
+    shadowRadius: shadows.medium.shadowRadius,
     elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   recentSearchItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'rgba(123, 44, 191, 0.1)',
   },
   recentSearchText: {
-    fontSize: 16,
-    color: '#333',
+    ...typography.body,
+    color: colors.textDark,
   },
   searchButton: {
-    marginLeft: 8,
-    backgroundColor: '#0066ff',
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    marginLeft: spacing.sm,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.medium,
     justifyContent: 'center',
     alignItems: 'center',
+    ...shadows.small,
   },
   searchButtonText: {
     color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
+    ...typography.body,
+    fontWeight: 'bold', // Override the normal fontWeight from typography.body
   },
   inputErrorText: {
-    color: '#d32f2f',
-    marginHorizontal: 12,
-    marginBottom: 12,
-    fontSize: 14,
+    color: colors.error,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    ...typography.caption,
   },
 });
 

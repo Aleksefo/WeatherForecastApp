@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, Text, Image, StyleSheet} from 'react-native';
 import {getWeatherIconUrl} from '../services/weatherApi';
+import {colors, spacing, shadows, borderRadius} from '../styles/theme';
 
 interface WeatherCardProps {
   temperature: number;
@@ -55,51 +56,61 @@ function WeatherCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    marginVertical: 8,
-    marginHorizontal: 16,
+    backgroundColor: colors.cardBackground,
+    borderRadius: borderRadius.large,
+    padding: spacing.lg,
+    ...shadows.medium,
+    marginVertical: spacing.md,
+    marginHorizontal: spacing.md,
+    borderTopWidth: 4,
+    borderTopColor: colors.primary,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   temperature: {
-    fontSize: 42,
-    fontWeight: 'bold',
+    fontSize: 48,
+    fontWeight: 'bold' as const,
+    color: colors.primary,
+    textShadowColor: 'rgba(123, 44, 191, 0.15)',
+    textShadowOffset: {width: 1, height: 1},
+    textShadowRadius: 2,
   },
   weatherIcon: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 100,
   },
   description: {
-    fontSize: 18,
-    color: '#666',
-    marginBottom: 16,
+    fontSize: 20,
+    color: colors.textMedium,
+    marginBottom: spacing.md,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   detailsContainer: {
-    marginTop: 8,
+    marginTop: spacing.md,
+    backgroundColor: colors.background,
+    borderRadius: borderRadius.medium,
+    padding: spacing.md,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.sm,
   },
   detailLabel: {
     fontSize: 16,
-    color: '#666',
+    color: colors.textMedium,
+    fontWeight: '500' as const,
   },
   detailValue: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600' as const,
+    color: colors.textDark,
   },
 });
 

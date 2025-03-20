@@ -23,6 +23,7 @@ import {
 } from '../services/weatherApi';
 import {useAppStore} from '../state/AppState';
 import {formatDate} from '../services/dateFormatter';
+import {colors, spacing, typography, shadows, borderRadius} from '../styles/theme';
 
 function HomeScreen(): React.JSX.Element {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
@@ -146,7 +147,7 @@ function HomeScreen(): React.JSX.Element {
 
             {loading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#0066ff" />
+                <ActivityIndicator size="large" color={colors.primary} />
                 <Text style={styles.loadingText}>Loading weather data...</Text>
               </View>
             ) : error ? (
@@ -176,7 +177,7 @@ function HomeScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.background,
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -188,76 +189,85 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
-    paddingBottom: 32,
+    padding: spacing.md,
+    paddingBottom: spacing.xxl,
   },
   header: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    ...typography.header,
     textAlign: 'center',
-    marginVertical: 16,
-    color: '#0066ff',
+    marginVertical: spacing.md,
+    color: colors.primary,
+    letterSpacing: 0.5,
   },
   location: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
     textAlign: 'center',
-    marginVertical: 8,
+    marginVertical: spacing.sm,
+    color: colors.textDark,
   },
   date: {
-    fontSize: 16,
-    color: '#666',
+    ...typography.body,
+    color: colors.textMedium,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: spacing.lg,
+    fontStyle: 'italic',
   },
   loadingContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 32,
+    padding: spacing.xl,
+    marginVertical: spacing.md,
+    backgroundColor: colors.cardBackground,
+    borderRadius: borderRadius.medium,
+    ...shadows.small,
   },
   loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#666',
+    marginTop: spacing.md,
+    ...typography.body,
+    color: colors.textMedium,
   },
   errorContainer: {
-    padding: 16,
-    backgroundColor: '#ffeeee',
-    borderRadius: 8,
-    marginVertical: 16,
+    padding: spacing.md,
+    backgroundColor: 'rgba(230, 57, 70, 0.1)',
+    borderRadius: borderRadius.medium,
+    marginVertical: spacing.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.error,
   },
   errorText: {
-    color: '#d32f2f',
+    color: colors.error,
     textAlign: 'center',
+    ...typography.body,
+    fontWeight: '500' as const,
   },
   extraDetailsContainer: {
-    marginTop: 24,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginTop: spacing.xl,
+    backgroundColor: colors.cardBackground,
+    borderRadius: borderRadius.large,
+    padding: spacing.md,
+    ...shadows.medium,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   detailItem: {
     flex: 1,
     alignItems: 'center',
   },
   detailLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+    ...typography.caption,
+    color: colors.textMedium,
+    marginBottom: spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   detailValue: {
-    fontSize: 16,
-    fontWeight: '500',
+    ...typography.body,
+    fontWeight: '600' as const,
+    color: colors.textDark,
   },
 });
 
