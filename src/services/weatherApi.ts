@@ -72,7 +72,7 @@ export const getCurrentWeather = async (
     );
     return response.data;
   } catch (error) {
-    console.error('Error fetching current weather:', error);
+    __DEV__ && console.error('Error fetching current weather:', error);
     throw error;
   }
 };
@@ -87,7 +87,7 @@ export const getFiveDayForecast = async (
     );
     return response.data;
   } catch (error) {
-    console.error('Error fetching forecast:', error);
+    __DEV__ && console.error('Error fetching forecast:', error);
     throw error;
   }
 };

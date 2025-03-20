@@ -23,7 +23,13 @@ import {
 } from '../services/weatherApi';
 import {useAppStore} from '../state/AppState';
 import {formatDate} from '../services/dateFormatter';
-import {colors, spacing, typography, shadows, borderRadius} from '../styles/theme';
+import {
+  colors,
+  spacing,
+  typography,
+  shadows,
+  borderRadius,
+} from '../styles/theme';
 
 function HomeScreen(): React.JSX.Element {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
@@ -80,7 +86,7 @@ function HomeScreen(): React.JSX.Element {
         } else {
           setError('Failed to fetch weather data. Please try again later.');
         }
-        console.error('Weather API error:', err);
+        __DEV__ && console.error('Weather API error:', err);
       } finally {
         setLoading(false);
       }
@@ -102,7 +108,6 @@ function HomeScreen(): React.JSX.Element {
       fetchWeatherData(city);
     }
   };
-
 
   const handleOutsidePress = () => {
     if (searchBarRef.current) {
