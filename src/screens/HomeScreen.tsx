@@ -118,7 +118,7 @@ function HomeScreen(): React.JSX.Element {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}>
@@ -130,8 +130,6 @@ function HomeScreen(): React.JSX.Element {
             activeOpacity={1}
             onPress={handleOutsidePress}
             style={styles.touchableContainer}>
-            <Text style={styles.header}>Weather Today</Text>
-
             <SearchBar
               ref={searchBarRef}
               onSearch={handleSearch}
@@ -196,13 +194,6 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
     paddingBottom: spacing.xxl,
-  },
-  header: {
-    ...typography.header,
-    textAlign: 'center',
-    marginVertical: spacing.md,
-    color: colors.primary,
-    letterSpacing: 0.5,
   },
   location: {
     fontSize: 24,

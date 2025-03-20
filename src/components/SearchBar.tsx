@@ -147,6 +147,7 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
 const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
+    marginTop: spacing.md,
     marginBottom: spacing.sm,
     marginHorizontal: spacing.sm,
   },
